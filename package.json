@@ -1,0 +1,19 @@
+{
+  "name": "shelby-serves-backend",
+  "version": "1.0.0",
+  "description": "Backend for Shelby Serves video platform",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "cloudinary": "^1.41.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.19.2",
+    "inngest": "^1.10.1",
+    "mongoose": "^8.23.0",
+    "multer": "^2.1.1",
+    "multer-storage-cloudinary": "^4.0.0"
+  }
+}
