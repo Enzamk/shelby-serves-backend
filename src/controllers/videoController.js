@@ -56,6 +56,16 @@ export const getVideosByUploaderAddress = async (req, res) => {
   }
 };
 
+// Get videos by uploader address (alias for getUserVideos)
+export const getUserVideos = async (req, res) => {
+  try {
+    const videos = await Video.find({ uploaderAddress: req.params.address }).sort({ createdAt: -1 });
+    res.json(videos);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // 2. Get a single video by ID
 export const getVideoById = async (req, res) => {
   try {

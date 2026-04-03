@@ -7,7 +7,7 @@ const videoSchema = new mongoose.Schema({
   videoUrl: { type: String },
   cloudinaryPublicId: { type: String },
   thumbnailUrl: { type: String },
-  uploaderAddress: { type: String },
+  uploaderAddress: { type: String, required: false },
   views: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now }
 });

@@ -4,6 +4,7 @@ import { storage } from '../config/cloudinary.js';
 import {
   getVideos,
   getVideosByUploaderAddress,
+  getUserVideos,
   getVideoById,
   getStreamUrl,
   incrementViews,
@@ -22,7 +23,7 @@ const upload = multer({
 });
 
 router.get('/', getVideos);
-router.get('/user/:address', getVideosByUploaderAddress);
+router.get('/user/:address', getUserVideos);
 router.post('/upload', upload.single('video'), uploadVideo);
 router.get('/:id', getVideoById);
 router.get('/:id/stream', getStreamUrl);
