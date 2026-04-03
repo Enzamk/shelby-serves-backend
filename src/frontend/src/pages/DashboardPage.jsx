@@ -49,7 +49,7 @@ export default function DashboardPage() {
   const fetchMyUploads = async () => {
     try {
       setLoading(true);
-      const response = await api.getVideosByUploaderAddress(walletAddress);
+      const response = await api.getUserVideos(walletAddress);
       setVideos(response.data);
       setLoading(false);
     } catch (err) {

@@ -22,3 +22,5 @@ export default function App() {
     </WalletProvider>
   );
 }
+
+// UI Sync v2.1.
