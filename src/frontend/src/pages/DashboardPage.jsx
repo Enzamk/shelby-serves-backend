@@ -46,20 +46,6 @@ export default function DashboardPage() {
     }
   };
 
-  const fetchMyUploads = async () => {
-    try {
-      setLoading(true);
-      const response = await api.getUserVideos(walletAddress);
-      setVideos(response.data);
-      setLoading(false);
-    } catch (err) {
-      const errorMessage = err.response?.data?.message || err.message || 'Failed to fetch your uploads';
-      setError(errorMessage);
-      setLoading(false);
-      console.error('Error fetching my uploads:', err);
-      console.error('Error response:', err.response);
-    }
-  };
 
   const handleDeleteVideo = async (videoId, videoTitle) => {
     if (!window.confirm(`Are you sure you want to delete "${videoTitle}"?`)) {
@@ -85,27 +71,22 @@ export default function DashboardPage() {
     setLoadedImages(prev => ({ ...prev, [videoId]: true }));
   };
 
+  // Fetch all videos on component mount
   useEffect(() => {
-    if (activeTab === 'all') {
-      fetchVideos();
-    } else if (activeTab === 'my-uploads' && isConnected) {
-      fetchMyUploads();
-    }
-    
-    // Add event listener for video uploads
+    fetchVideos();
+  }, []);
+
+  // Handle video uploaded event
+  useEffect(() => {
     const handleVideoUploaded = () => {
-      if (activeTab === 'all') {
-        fetchVideos();
-      } else if (activeTab === 'my-uploads' && isConnected) {
-        fetchMyUploads();
-      }
+      fetchVideos(); // Always refresh all videos when a new video is uploaded
     };
     window.addEventListener('videoUploaded', handleVideoUploaded);
     
     return () => {
       window.removeEventListener('videoUploaded', handleVideoUploaded);
     };
-  }, [activeTab, isConnected]);
+  }, []);
 
   // Real-time data updates every 30 seconds
   useEffect(() => {
@@ -132,10 +113,20 @@ export default function DashboardPage() {
     return () => clearInterval(interval);
   }, [videos]);
 
-  // Calculate statistics
-  const totalVideos = videos.length;
-  const totalViews = videos.reduce((total, video) => total + (video.views || 0), 0);
-  const trendingVideos = [...videos]
+  // Compute display videos based on active tab
+  const displayVideos = React.useMemo(() => {
+    if (activeTab === 'my-uploads' && isConnected && walletAddress) {
+      return videos.filter(video =>
+        video.uploaderAddress && video.uploaderAddress.toLowerCase() === walletAddress.toLowerCase()
+      );
+    }
+    return videos;
+  }, [videos, activeTab, isConnected, walletAddress]);
+
+  // Calculate statistics (use displayVideos for tab-specific stats)
+  const totalVideos = displayVideos.length;
+  const totalViews = displayVideos.reduce((total, video) => total + (video.views || 0), 0);
+  const trendingVideos = [...displayVideos]
     .sort((a, b) => (b.views || 0) - (a.views || 0))
     .slice(0, 3);
 
@@ -144,7 +135,7 @@ export default function DashboardPage() {
   const erasureCodingHealth = 99.9;
 
   const uploadsByDate = {};
-  videos.forEach(video => {
+  displayVideos.forEach(video => {
     const date = new Date(video.createdAt).toISOString().split('T')[0];
     uploadsByDate[date] = (uploadsByDate[date] || 0) + 1;
   });
@@ -350,7 +341,7 @@ export default function DashboardPage() {
 
         {/* Analytics Charts Section */}
         <div className="mb-8">
-          {videos.length === 0 ? (
+          {displayVideos.length === 0 ? (
             <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-lg p-8 text-center">
               <p className="text-slate-400">No video data available for analytics.</p>
             </div>
@@ -497,13 +488,13 @@ export default function DashboardPage() {
         <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">
           {activeTab === 'my-uploads' ? 'My Uploads' : 'All Videos'}
         </h2>
-        {videos.length === 0 ? (
+        {displayVideos.length === 0 ? (
           <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-lg p-12 text-center">
             <p className="text-lg text-slate-400 mb-4">No videos found. Upload your first video to get started!</p>
           </div>
         ) : (
           <div className="space-y-4">
-            {videos.map(video => (
+            {displayVideos.map(video => (
               <div key={video._id} className="bg-slate-900 border border-slate-800 rounded-2xl shadow-lg p-6 hover:-translate-y-1 hover:shadow-xl transition-all duration-300">
                 <div className="flex gap-4 items-center">
                   {/* Thumbnail */}
